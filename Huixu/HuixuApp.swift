@@ -226,7 +226,7 @@ final class LayerCanvas: UIView {
             let view: LayerCanvas
             if let existing = views[l.id] { view = existing }
             else {
-                view = LayerCanvas(l); views[l.id] = view
+                view = LayerCanvas(l); view.contentScaleFactor = 1; views[l.id] = view
                 let tap = UITapGestureRecognizer(target: self, action: #selector(tapped(_:))); view.addGestureRecognizer(tap)
                 let pan = UIPanGestureRecognizer(target: self, action: #selector(moved(_:))); pan.maximumNumberOfTouches = 1; view.addGestureRecognizer(pan)
                 let pinch = UIPinchGestureRecognizer(target: self, action: #selector(scaled(_:))); pinch.delegate = self; view.addGestureRecognizer(pinch)
