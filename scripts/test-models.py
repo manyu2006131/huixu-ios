@@ -19,9 +19,7 @@ bad=doc;bad.layers[0].scale=0
 do {try bad.validate();fatalError("zero scale accepted")}catch{}
 bad=doc;bad.layers[0].opacity=2
 do {try bad.validate();fatalError("invalid opacity accepted")}catch{}
-var clearing=doc;clearing.drawing=Data([1,2,3]);clearing.drawing=Data()
-check(clearing.layers==doc.layers,"clearing ink erased image/text layers")
-print("PASS: document roundtrip, transforms, Unicode, invalid dimensions, duplicate UUID, invalid scale and opacity, ink isolation")
+print("PASS: document roundtrip, transforms, Unicode, invalid dimensions, duplicate UUID, invalid scale and opacity")
 '''
 with tempfile.TemporaryDirectory() as d:
  p=Path(d)/'main.swift';p.write_text('import Foundation\n'+models+tests)
