@@ -1,0 +1,6 @@
+build/
+simulator-build/
+artifacts/
+staging/
+*.xcuserstate
+.DS_Store

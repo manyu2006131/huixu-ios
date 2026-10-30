@@ -1,0 +1,99 @@
+name: Build iPhone IPA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Huixu/**'
+      - 'Huixu.xcodeproj/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile and package unsigned IPA
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Show Xcode environment
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks
+      - name: Test document model
+        run: python3 scripts/test-models.py
+      - name: Build iPhone application
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          xcodebuild -project Huixu.xcodeproj -scheme Huixu \
+            -configuration Release -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            build 2>&1 | tee artifacts/device-build.log
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p staging/Payload
+          cp -R build/Build/Products/Release-iphoneos/Huixu.app staging/Payload/
+          test -f staging/Payload/Huixu.app/Huixu
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' staging/Payload/Huixu.app/Info.plist
+          (cd staging && zip -qry ../artifacts/Huixu-unsigned.ipa Payload)
+          shasum -a 256 artifacts/Huixu-unsigned.ipa > artifacts/SHA256.txt
+          printf '%s\n' 'This IPA is unsigned. Sign it for your device before installation.' > artifacts/READ-ME.txt
+      - name: Compile simulator app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project Huixu.xcodeproj -scheme Huixu \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath simulator-build CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee artifacts/simulator-build.log
+      - name: Launch simulator and capture home
+        shell: bash
+        run: |
+          set -euo pipefail
+          simulator_id=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for group in d["devices"].values() for x in group if "iPhone" in x["name"]))')
+          echo "SIMULATOR_ID=$simulator_id" >> "$GITHUB_ENV"
+          xcrun simctl boot "$simulator_id"
+          xcrun simctl bootstatus "$simulator_id" -b
+          xcrun simctl install "$simulator_id" simulator-build/Build/Products/Debug-iphonesimulator/Huixu.app
+          xcrun simctl launch "$simulator_id" com.manyu2006131.huixu | tee artifacts/simulator-launch.log
+          sleep 3
+          xcrun simctl io "$simulator_id" screenshot artifacts/home.png
+      - name: Test editor workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project Huixu.xcodeproj -scheme Huixu \
+            -configuration Debug -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath simulator-build -resultBundlePath artifacts/UITests.xcresult \
+            CODE_SIGNING_ALLOWED=NO test 2>&1 | tee artifacts/ui-tests.log
+      - name: Shut down simulator
+        if: always() && env.SIMULATOR_ID != ''
+        run: xcrun simctl shutdown "$SIMULATOR_ID" || true
+      - name: Upload IPA and logs
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: Huixu-iPhone-${{ github.run_number }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
