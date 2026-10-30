@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ios-${{ github.ref }}
@@ -89,6 +89,19 @@ jobs:
       - name: Shut down simulator
         if: always() && env.SIMULATOR_ID != ''
         run: xcrun simctl shutdown "$SIMULATOR_ID" || true
+      - name: Publish public test release
+        if: success() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: v0.1.0-build.${{ github.run_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp RELEASE_NOTES.md artifacts/RELEASE_NOTES.md
+          gh release create "$RELEASE_TAG" --target "$GITHUB_SHA" \
+            --title "绘序 0.1 · 测试版 ${{ github.run_number }}" --prerelease \
+            --notes-file artifacts/RELEASE_NOTES.md \
+            artifacts/Huixu-unsigned.ipa artifacts/SHA256.txt artifacts/home.png
       - name: Upload IPA and logs
         if: always()
         uses: actions/upload-artifact@v7.0.2

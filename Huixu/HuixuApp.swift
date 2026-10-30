@@ -155,7 +155,7 @@ struct ArtDocument: Codable, Equatable {
         let l = EditLayer(name: "图片 \(document.layers.count + 1)", image: data, x: Double(document.width) / 2, y: Double(document.height) / 2, width: image.size.width * factor, height: image.size.height * factor)
         var next = document; next.layers.append(l)
         do { try ArtRender.validatePixels(next); commit(next); selected = l.id; mode = "移动" }
-        catch { error = "图片总像素已达上限，请减少图层" }
+        catch { self.error = "图片总像素已达上限，请减少图层" }
     }
     func clearDrawing() { var next = document; next.drawing = Data(); commit(next) }
     func replace(_ doc: ArtDocument) { writable = true; selected = nil; commit(doc); save() }

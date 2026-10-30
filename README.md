@@ -41,7 +41,9 @@
 
 ## 下载与构建
 
-[查看 Actions 编译和下载产物](../../actions)。成功运行的 Artifacts 中提供 `Huixu-unsigned.ipa` 和检查日志。下载 Actions 产物需要登录 GitHub，产物保留 14 天。
+[下载公开测试版 IPA](https://github.com/manyu2006131/huixu-ios/releases)。完整检查成功后，工作流会自动创建公开测试版 Release，提供 IPA、校验文件和界面预览。公开 Release 下载无需登录；失败的构建不会发布。
+
+[查看 Actions 编译记录](https://github.com/manyu2006131/huixu-ios/actions)。Artifacts 也保留 IPA 和检查日志，需登录下载，保留 14 天。
 
 **IPA 尚需个人设备签名后安装，不能直接点击安装。** 当前不是 App Store 发布版。具体编译和测试状态请以对应运行记录为准；源码完成不代表已通过真机验收。
 
