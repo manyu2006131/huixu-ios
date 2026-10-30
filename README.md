@@ -6,6 +6,10 @@
 
 ![应用图标](Huixu/Assets.xcassets/AppIcon.appiconset/icon.png)
 
+## 编辑界面
+
+<img src="https://github.com/manyu2006131/huixu-ios/releases/download/v0.1.0-build.4/home.png" alt="绘序实际模拟器界面" width="320">
+
 ## 主要功能
 
 | 工具 | 当前实现 |
@@ -28,6 +32,8 @@
 
 手绘笔迹合为独立顶层，始终位于图片和文字上方；没有逐个笔迹图层的自由排序。橡皮按笔画擦除，不是像素橡皮。画布导出尺寸固定为所选画布尺寸，不会输出画布外的隐藏内容。
 
+一键清理仅作用于本应用新增的手绘笔迹与文字图层；不能还原已经压进照片像素里的涂鸦或文字。
+
 ## 使用方式
 
 1. 顶部图片按钮导入照片，或点击文字按钮新增文字。
@@ -40,6 +46,10 @@
 本机工程仅自动保存当前一份。开始新作品前请先导出 JSON；卸载前也请备份。PNG/JPEG 不保留可编辑图层。
 
 ## 下载与构建
+
+已发布：[0.1.0 测试版 build 4](https://github.com/manyu2006131/huixu-ios/releases/tag/v0.1.0-build.4) · [直接下载未签名 IPA](https://github.com/manyu2006131/huixu-ios/releases/download/v0.1.0-build.4/Huixu-unsigned.ipa)。
+
+2026-10-31 已通过文档模型测试、iPhone Release 编译、模拟器编译/启动，以及文字图层新增、清理、撤销重做与重启保留的关键 UI 流程测试（1 个测试，0 失败）。[查看验证记录](https://github.com/manyu2006131/huixu-ios/actions/runs/41089886177)。下载后另已核对 IPA 的 SHA256、arm64 程序头、Bundle ID 和 0.1.0 版本。照片导入、笔刷与复杂图片变换、透明导出及签名安装仍需真机验收。
 
 [下载公开测试版 IPA](https://github.com/manyu2006131/huixu-ios/releases)。完整检查成功后，工作流会自动创建公开测试版 Release，提供 IPA、校验文件和界面预览。公开 Release 下载无需登录；失败的构建不会发布。
 
